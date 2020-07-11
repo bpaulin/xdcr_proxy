@@ -1,0 +1,38 @@
+version: "3.3"
+services:
+  node_a:
+    image: couchbase:enterprise-6.5.1
+    ports:
+      - "18091:8091"
+    extra_hosts:
+      - "node_b:10.1.0.101"
+    networks:
+      cluster_a:
+        ipv4_address: 10.1.0.100
+
+  proxy:
+    image: nginx:stable-alpine
+    networks:
+      cluster_a:
+        ipv4_address: 10.1.0.101
+      cluster_b:
+        ipv4_address: 10.1.1.101
+
+  node_b:
+    image: couchbase:enterprise-6.5.1
+    ports:
+      - "28091:8091"
+    networks:
+      cluster_b:
+        ipv4_address: 10.1.1.100
+networks:
+  cluster_a:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.0.0/24
+  cluster_b:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.1.1.0/24
