@@ -1,37 +1,59 @@
 version: "3.3"
 services:
-  node_a:
+  west_a:
     image: couchbase:enterprise-6.5.1
     ports:
       - "18091:8091"
     extra_hosts:
-      - "node_b:10.1.0.101"
+      - "a.west.local:10.1.0.100"
+      - "b.west.local:10.1.0.101"
     networks:
-      cluster_a:
+      west:
         ipv4_address: 10.1.0.100
-
-  proxy:
-    image: nginx:stable-alpine
+  west_b:
+    image: couchbase:enterprise-6.5.1
+    extra_hosts:
+      - "a.west.local:10.1.0.100"
+      - "b.west.local:10.1.0.101"
     networks:
-      cluster_a:
+      west:
         ipv4_address: 10.1.0.101
-      cluster_b:
-        ipv4_address: 10.1.1.101
 
-  node_b:
+  east_a:
     image: couchbase:enterprise-6.5.1
     ports:
       - "28091:8091"
+    extra_hosts:
+      - "a.east.local:10.1.1.100"
+      - "b.east.local:10.1.1.101"
     networks:
-      cluster_b:
+      east:
         ipv4_address: 10.1.1.100
+  east_b:
+    image: couchbase:enterprise-6.5.1
+    extra_hosts:
+      - "a.east.local:10.1.1.100"
+      - "b.east.local:10.1.1.101"
+    networks:
+      east:
+        ipv4_address: 10.1.1.101
+
+
+  # proxy:
+  #   image: nginx:stable-alpine
+  #   networks:
+  #     cluster_a:
+  #       ipv4_address: 10.1.0.101
+  #     cluster_b:
+  #       ipv4_address: 10.1.1.101
+
 networks:
-  cluster_a:
+  west:
     ipam:
       driver: default
       config:
         - subnet: 10.1.0.0/24
-  cluster_b:
+  east:
     ipam:
       driver: default
       config:
