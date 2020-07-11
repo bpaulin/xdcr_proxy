@@ -5,19 +5,23 @@ services:
     ports:
       - "18091:8091"
     extra_hosts:
-      - "a.west.local:10.1.0.100"
-      - "b.west.local:10.1.0.101"
+      - "a.east.local:10.1.0.105"
+      - "b.east.local:10.1.0.105"
     networks:
       west:
         ipv4_address: 10.1.0.100
+        aliases:
+          - a.west.local
   west_b:
     image: couchbase:enterprise-6.5.1
     extra_hosts:
-      - "a.west.local:10.1.0.100"
-      - "b.west.local:10.1.0.101"
+      - "a.east.local:10.1.0.105"
+      - "b.east.local:10.1.0.105"
     networks:
       west:
         ipv4_address: 10.1.0.101
+        aliases:
+          - b.west.local
 
   east_a:
     image: couchbase:enterprise-6.5.1
@@ -29,6 +33,8 @@ services:
     networks:
       east:
         ipv4_address: 10.1.1.100
+        aliases:
+          - a.east.local
   east_b:
     image: couchbase:enterprise-6.5.1
     extra_hosts:
@@ -37,15 +43,21 @@ services:
     networks:
       east:
         ipv4_address: 10.1.1.101
+        aliases:
+          - b.east.local
 
-
-  # proxy:
-  #   image: nginx:stable-alpine
-  #   networks:
-  #     cluster_a:
-  #       ipv4_address: 10.1.0.101
-  #     cluster_b:
-  #       ipv4_address: 10.1.1.101
+  proxy:
+    image: nginx:stable-alpine
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8091"
+      - "8092"
+    networks:
+      west:
+        ipv4_address: 10.1.0.105
+      east:
+        ipv4_address: 10.1.1.105
 
 networks:
   west:
